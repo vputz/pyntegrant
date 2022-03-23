@@ -1,8 +1,4 @@
-# braket stuff
-braket-job-jobs*/
-# pants stuff
-.pants.d/
-.pids/
+sandbox/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

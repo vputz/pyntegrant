@@ -5,7 +5,7 @@ a system
 
 from dataclasses import dataclass
 from functools import partial, reduce
-from typing import Any, Callable, Iterable, Mapping, NewType, Union
+from typing import Any, Callable, Iterable, Mapping, NewType, Union, KeysView
 
 import networkx as nx
 from icontract import ensure, require
@@ -23,7 +23,7 @@ class PRef:
 
 
 SystemMap = Mapping[Key, Any]
-Keyset = frozenset[Key]
+Keyset = Union[frozenset[Key], KeysView]
 
 
 def all_keys_valid(m: SystemMap) -> bool:

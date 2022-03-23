@@ -1,8 +1,10 @@
+import pprint
+
 import networkx as nx
 import pytest
 
-from pyntegrant.map import (PRef, SystemMap, dependency_graph, find_keys,
-                            transitive_dependencies,
+from pyntegrant.map import (PRef, SystemMap, build, dependency_graph,
+                            find_keys, transitive_dependencies,
                             transitive_dependencies_set)
 
 
@@ -57,4 +59,34 @@ def m1() -> SystemMap:
 def test_find_keys(config, nodes, expected):
     # this tests dependent_keys
     result = find_keys(config, nodes, transitive_dependencies_set)
+    assert result == expected
+
+
+# from https://github.com/weavejester/integrant/blob/32a46f5dca8a6b563a6dddf88bec887be3201b08/test/integrant/core_test.cljc#L476
+@pytest.mark.parametrize(
+    "config, expected",
+    [
+        (
+            {"a": PRef("b"), "b": 1},
+            (
+                {"a": ["build", "a", ["build", "b", 1]], "b": ["build", "b", 1]},
+                [["build", "b", 1], ["build", "a", ["build", "b", 1]]],
+            ),
+        )
+    ],
+)
+def test_build(config, expected):
+    def build_log(config: SystemMap):
+        log = []
+
+        def add_build_step(k, v):
+            r = ["build", k, v]
+            log.append(r)
+            return r
+
+        result = build(config, config.keys(), add_build_step)
+        return (result, log)
+
+    result = build_log(config)
+    pprint.pprint(result)
     assert result == expected

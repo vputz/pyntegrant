@@ -4,10 +4,13 @@ a system
 """
 
 from dataclasses import dataclass
-from functools import reduce
-from typing import Any, Mapping, NewType, Union
+from functools import partial, reduce
+from typing import Any, Callable, Iterable, Mapping, NewType, Union
 
+import networkx as nx
+from icontract import ensure, require
 from networkx import DiGraph
+from pyrsistent import pmap
 
 from pyntegrant.helpers import depth_search, reduce_kv
 
@@ -20,6 +23,7 @@ class PRef:
 
 
 SystemMap = Mapping[Key, Any]
+Keyset = frozenset[Key]
 
 
 def all_keys_valid(m: SystemMap) -> bool:
@@ -68,4 +72,119 @@ def dependency_graph(config: SystemMap) -> DiGraph:
         ),
         DiGraph(),
         config,
+    )
+
+
+@require(lambda g, node: node in g)
+@ensure(lambda result, g: all([n in g for n in result]))
+def transitive_dependencies(g: DiGraph, node: Any) -> frozenset[Any]:
+    """The set of all things which any node in node-set depends on"""
+    return frozenset(nx.descendants(g, node))
+
+
+@require(lambda g, nodes: [node in g for node in nodes])
+@ensure(lambda result, g: all([n in g for n in result]))
+def transitive_dependencies_set(g: DiGraph, nodes: Keyset) -> Keyset:
+    """The set of all things which any node in nodes depends on,
+    directly or transitively
+    """
+    return frozenset.union(*[transitive_dependencies(g, node) for node in nodes])
+
+
+def find_keys(
+    config: SystemMap, keys: Keyset, f: Callable[[DiGraph, Keyset], Keyset]
+) -> list[Key]:
+    """Return the union of keys and f(config, keys), topologically sorted
+    so that the last item in the list depends on everything before it"""
+    g = dependency_graph(config)
+    print(g)
+    fkeys = frozenset(f(g, keys))
+    print(fkeys)
+    result = frozenset.union(frozenset(keys), fkeys)
+    sorted_nodes = list(nx.topological_sort(g))
+    return sorted(result, key=lambda x: sorted_nodes.index(x), reverse=True)
+
+
+def dependent_keys(config: SystemMap, keys: Keyset) -> list[Key]:
+    return find_keys(config, keys, transitive_dependencies_set)
+
+
+def select_keys(config: SystemMap, keys: Iterable[Key]) -> SystemMap:
+    return pmap({k: config[k] for k in keys})
+
+
+# from https://gist.github.com/SegFaultAX/10941721,
+# and my isn't it elegant
+def identity(e):
+    return e
+
+
+def walk(inner, outer, coll):
+    if isinstance(coll, list):
+        return outer([inner(e) for e in coll])
+    elif isinstance(coll, dict):
+        return outer(dict([inner(e) for e in coll.items()]))
+    elif isinstance(coll, tuple):
+        return outer([inner(e) for e in coll])
+    else:
+        return outer(coll)
+
+
+def postwalk(fn, coll):
+    return walk(partial(postwalk, fn), fn, coll)
+
+
+@require(lambda ref, config: ref.key in config)
+def ref_resolve(ref: PRef, config: SystemMap, resolvef: Callable[[Key, Any], Any]):
+    """Resolves the reference in the given config.
+
+    This is slightly more complicated than it needs to be; more than
+    necessary for the simple version of Integrant we're building here, but
+    less complicated than necessary for the full version of Integrant.  Expect
+    modification either way in the future.
+    """
+    return resolvef(ref.key, config.get(ref.key))
+
+
+def expand_key(config: SystemMap, resolvef: Callable[[Key, Any], Any], v: Any) -> Any:
+    """Walks the value, resolving all refs within using the passed function and the given
+    config (a typical resolvef could be lambda k,v: v)"""
+    return postwalk(
+        lambda x: ref_resolve(x, config, resolvef) if is_reflike(x) else x, v
+    )
+
+
+@ensure(lambda result, k, v: result[k] == v)
+def assoc(system: SystemMap, k: Key, v: Any):
+    return pmap(system).update(pmap({k: v}))
+
+
+def build_key(
+    buildfn: Callable[[Key, Any], Any],
+    resolvef: Callable[[Key, Any], Any],
+    system: SystemMap,
+    kv: tuple[Key, Any],
+) -> SystemMap:
+    k, v = kv
+    expanded_value = expand_key(system, resolvef, v)
+    built_value = buildfn(k, expanded_value)
+    return assoc(system, k, built_value)
+
+
+def build(config: SystemMap, keys: Keyset, f: Callable[[Key, Any], Any]) -> SystemMap:
+    """Apply function f to each (key, value) pair in a configuration map,
+    traversing keys in dependency order and expanding any references in the value.
+
+    The function should take two arguments, a key and value, and return a new value.
+
+    Todo: An optional fourth argument, assertf, may be supplied to provide an
+    assertion check on the system, key, and expanded value.
+    """
+    relevant_keys = dependent_keys(config, keys)
+    relevant_config = select_keys(config, relevant_keys)
+    resolvef = lambda k, v: v
+    return pmap(
+        reduce(
+            partial(build_key, f, resolvef), ((k, config[k]) for k in relevant_keys), {}
+        ),
     )

@@ -1,3 +1,7 @@
+* Links
+
+https://github.com/weavejester/dependency
+
 
 * Dependency
 
@@ -49,3 +53,11 @@ and the first value in coll, then applying f to that result and the
 and f is not called. Note that reduce-kv is supported on vectors,
 where the keys will be the ordinals.
 
+build
+ambiguous-refs (PRefs which have no matching key in the config?)
+with-meta; interesting
+
+The advantage of doing an arbitrary function is logging, testing, more;
+it's a very generic traversal system.  Interesting.
+
+First step: implement build with config, keys, function

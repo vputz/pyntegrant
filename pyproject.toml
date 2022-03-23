@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "pyntegrant"
+version = "0.1.0"
+description = ""
+authors = ["Vic Putz <vbputz@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyrsistent = "^0.18.1"
+toolz = "^0.11.2"
+networkx = "^2.7.1"
+icontract = "^2.6.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2"
+pipdeptree = "^2.2.1"
+python-lsp-server = {extras = ["rope", "pyflakes", "mccabe"], version = "^1.3.3"}
+mypy-ls = "^0.5.1"
+pyls-isort = "^0.2.2"
+python-lsp-black = "^1.1.0"
+pyls-memestra = "^0.0.16"
+pre-commit = "^2.17.0"
+pytest-xdist = "^2.5.0"
+mypy = "^0.941"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.mypy.overrides]]
+module = [
+  "networkx",
+]
+ignore_missing_imports = true

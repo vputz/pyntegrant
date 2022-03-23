@@ -1,0 +1,51 @@
+
+* Dependency
+
+dep/depend graph node dep
+
+dep/graph - returns a new empty dependency graph
+
+* Integrant
+
+
+(defn- depth-search [pred? coll]
+  (filter pred? (tree-seq coll? seq coll)))
+
+(defn find-derived
+  "Return a seq of all entries in a map, m, where the key is derived from the
+  a candidate key, k. If there are no matching keys, nil is returned. The
+  candidate key may be a keyword, or vector of keywords."
+  [m k]
+  (seq (filter #(or (= (key %) k) (derived-from? (key %) k)) m)))
+
+  
+(defn- find-derived-refs [config v include-refsets?]
+;; find everything under a value which is a reference, 
+  (->> (depth-search (if include-refsets? reflike? ref?) v)
+  ;; get the key for it
+       (map ref-key)
+       (mapcat #(map key (find-derived config %)))))
+
+(defn dependency-graph
+  "Return a dependency graph of all the refs and refsets in a config. Resolves
+  derived dependencies. Takes the following options:
+  `:include-refsets?`
+  : whether to include refsets in the dependency graph (defaults to true)"
+  ([config]
+   (dependency-graph config {}))
+  ([config {:keys [include-refsets?] :or {include-refsets? true}}]
+   (letfn [(find-refs [v]
+             (find-derived-refs config v include-refsets?))]
+     (reduce-kv (fn [g k v] (reduce #(dep/depend %1 k %2) g (find-refs v)))
+     ; for each k,v in config, add dep from k to every ref in v
+                (dep/graph)
+                config))))
+
+		(reduce-kv f init coll)
+Reduces an associative collection. f should be a function of 3
+arguments. Returns the result of applying f to init, the first key
+and the first value in coll, then applying f to that result and the
+2nd key and value, etc. If coll contains no entries, returns init
+and f is not called. Note that reduce-kv is supported on vectors,
+where the keys will be the ordinals.
+

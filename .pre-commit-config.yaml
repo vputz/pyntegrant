@@ -1,0 +1,26 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+  hooks:
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+    - id: check-yaml
+    - id: check-toml
+    - id: requirements-txt-fixer
+- repo: https://github.com/kynan/nbstripout
+  rev: 0.5.0
+  hooks:
+    - id: nbstripout
+- repo: https://github.com/psf/black
+  rev: 21.12b0
+  hooks:
+    - id: black
+    - id: black
+      name: black-for-BUILD
+      # had to use types_or here since types_or was defined for the original
+      # black hook (https://github.com/psf/black/blob/main/.pre-commit-hooks.yaml)
+      # after "files" and "types" failed.  The type is "bazel" since bazel and pants
+      # both use starlark (or similar, ie subset of python) for BUILD files
+      types_or: [bazel]

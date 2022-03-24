@@ -6,7 +6,7 @@ authors = ["Vic Putz <vbputz@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pyrsistent = "^0.18.1"
+pyrsistent = "^0.18.0"
 toolz = "^0.11.2"
 networkx = "^2.7.1"
 icontract = "^2.6.1"

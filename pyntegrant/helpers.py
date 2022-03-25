@@ -4,7 +4,7 @@ related to functions in Clojure.
 
 from collections import deque
 from collections.abc import Iterable
-from functools import reduce
+from functools import partial, reduce
 from typing import Any, Callable, Generator, Mapping, Sequence, TypeVar
 
 from icontract import require
@@ -71,3 +71,27 @@ def reduce_kv(f: Callable[[T, U, V], T], init: T, coll: Mapping):
     else:
         f2 = lambda accum, item: f(accum, item[0], item[1])
         return reduce(f2, coll.items(), init)
+
+
+# from https://gist.github.com/SegFaultAX/10941721,
+# and my isn't it elegant
+def identity(e):
+    return e
+
+
+def walk(inner, outer, coll):
+    """Oh wow.  Easiest just to look at
+    https://clojuredocs.org/clojure.walk/postwalk
+    """
+    if isinstance(coll, list):
+        return outer([inner(e) for e in coll])
+    elif isinstance(coll, dict):
+        return outer(dict([inner(e) for e in coll.items()]))
+    elif isinstance(coll, tuple):
+        return outer([inner(e) for e in coll])
+    else:
+        return outer(coll)
+
+
+def postwalk(fn, coll):
+    return walk(partial(postwalk, fn), fn, coll)

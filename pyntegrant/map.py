@@ -12,7 +12,7 @@ from icontract import ensure, require
 from networkx import DiGraph
 from pyrsistent import pmap
 
-from pyntegrant.helpers import depth_search, reduce_kv
+from pyntegrant.helpers import depth_search, reduce_kv, postwalk
 
 Key = str
 
@@ -111,27 +111,6 @@ def dependent_keys(config: SystemMap, keys: Keyset) -> list[Key]:
 
 def select_keys(config: SystemMap, keys: Iterable[Key]) -> SystemMap:
     return pmap({k: config[k] for k in keys})
-
-
-# from https://gist.github.com/SegFaultAX/10941721,
-# and my isn't it elegant
-def identity(e):
-    return e
-
-
-def walk(inner, outer, coll):
-    if isinstance(coll, list):
-        return outer([inner(e) for e in coll])
-    elif isinstance(coll, dict):
-        return outer(dict([inner(e) for e in coll.items()]))
-    elif isinstance(coll, tuple):
-        return outer([inner(e) for e in coll])
-    else:
-        return outer(coll)
-
-
-def postwalk(fn, coll):
-    return walk(partial(postwalk, fn), fn, coll)
 
 
 @require(lambda ref, config: ref.key in config)

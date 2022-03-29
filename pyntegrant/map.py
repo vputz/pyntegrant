@@ -97,9 +97,7 @@ def find_keys(
     """Return the union of keys and f(config, keys), topologically sorted
     so that the last item in the list depends on everything before it"""
     g = dependency_graph(config)
-    print(g)
     fkeys = frozenset(f(g, keys))
-    print(fkeys)
     result = frozenset.union(frozenset(keys), fkeys)
     sorted_nodes = list(nx.topological_sort(g))
     return sorted(result, key=lambda x: sorted_nodes.index(x), reverse=True)

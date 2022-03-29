@@ -19,3 +19,9 @@ original.
 Still, shadows have power.  It can already do the initialization portion
 of a system, although items like prep, halt, suspend, etc remain,
 as do derived keys and refsets.  But one thing at a time.
+
+As of the 0.1.0 prerelease, all that works is the basic assembly of a
+system from a configuration (in Python, JSON, or TOML) and it's
+surprising how effective that actually can be.  Unfortunately error
+messages are lightly cryptic and documentation is nonexistent, but
+more will be coming shortly.

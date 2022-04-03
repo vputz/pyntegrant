@@ -1,8 +1,13 @@
 [tool.poetry]
 name = "pyntegrant"
 version = "0.1.0"
-description = ""
+description = "A system assembly framework based on Integrant"
 authors = ["Vic Putz <vbputz@gmail.com>"]
+classifiers = [
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+readme="README.rst"
+homepage="https://github.com/vputz/pyntegrant"
 
 [tool.poetry.dependencies]
 python = "^3.9"

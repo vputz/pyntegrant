@@ -28,6 +28,8 @@ def seq(x: Any) -> Iterable:
         return x
     elif isinstance(x, Mapping):
         return x.items()
+    else:
+        assert False
 
 
 def tree_seq(

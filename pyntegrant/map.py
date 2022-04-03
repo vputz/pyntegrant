@@ -5,14 +5,14 @@ a system
 
 from dataclasses import dataclass
 from functools import partial, reduce
-from typing import Any, Callable, Iterable, Mapping, NewType, Union, KeysView
+from typing import Any, Callable, Iterable, KeysView, Mapping, NewType, Union
 
 import networkx as nx
 from icontract import ensure, require
 from networkx import DiGraph
 from pyrsistent import pmap
 
-from pyntegrant.helpers import depth_search, reduce_kv, postwalk
+from pyntegrant.helpers import depth_search, postwalk, reduce_kv
 
 Key = str
 
@@ -66,7 +66,7 @@ def dependency_graph(config: SystemMap) -> DiGraph:
     sorted to determine an initialization order.  An edge ('A', 'B') in the digraph
     represents the dependency of A on B.
     """
-    return reduce_kv(
+    return reduce_kv(  # type:ignore
         lambda g, k, v: reduce(
             lambda g2, v2: add_dependency(g2, k, v2), find_refs(v), g
         ),
@@ -162,6 +162,8 @@ def build(config: SystemMap, keys: Keyset, f: Callable[[Key, Any], Any]) -> Syst
     resolvef = lambda k, v: v
     return pmap(
         reduce(
-            partial(build_key, f, resolvef), ((k, config[k]) for k in relevant_keys), {}
+            partial(build_key, f, resolvef),  # type:ignore
+            ((k, config[k]) for k in relevant_keys),
+            {},
         ),
     )

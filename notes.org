@@ -22,9 +22,9 @@ dep/graph - returns a new empty dependency graph
   [m k]
   (seq (filter #(or (= (key %) k) (derived-from? (key %) k)) m)))
 
-  
+
 (defn- find-derived-refs [config v include-refsets?]
-;; find everything under a value which is a reference, 
+;; find everything under a value which is a reference,
   (->> (depth-search (if include-refsets? reflike? ref?) v)
   ;; get the key for it
        (map ref-key)

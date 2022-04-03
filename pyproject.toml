@@ -30,6 +30,8 @@ pre-commit = "^2.17.0"
 pytest-xdist = "^2.5.0"
 mypy = "^0.941"
 tox = "^3.24.5"
+Sphinx = "^4.5.0"
+sphinx-rtd-theme = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

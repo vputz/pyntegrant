@@ -3,6 +3,7 @@ name = "pyntegrant"
 version = "0.1.0"
 description = "A system assembly framework based on Integrant"
 authors = ["Vic Putz <vbputz@gmail.com>"]
+license =  "Apache-2.0"
 classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules"
 ]

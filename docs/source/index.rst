@@ -57,7 +57,7 @@ but what if you made it easy to throw *lots* of them away?
    :maxdepth: 2
    :caption: API:
 
-
+   api
 
 
 Indices and tables

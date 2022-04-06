@@ -58,10 +58,20 @@ and then the system can be built:
     system = System.from_config(config, initializer())
     print(system.analyzer.process())
 
+Pyntegrant will run through the configuration and create an object
+with each key in reverse dependency order, with references created and
+replaced as it goes.  In other words, in this simple config, it will
+create an ``input`` object, an ``output`` object, and a ``processor``
+object, and finally create the ``analyzer`` object with those three as
+arguments.
+
 In this way, each part of the system can vary independently with zero
 knowledge of each others' existence--and since the configurations can
 be pure data, it's possible to mix and match parts of the system via
-pure-data inputs.
+pure-data inputs or reconfigure at a moment's notice.
+
+Pyntegrant does not *yet* support Integrant's reverse-shutdown or
+suspend functionality; I will add it as time and requirements allow.
 
 Since the initializer can return anything, it's even possible to wrap
 up part of the system in an external process and return a future from

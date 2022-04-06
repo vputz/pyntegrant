@@ -8,6 +8,8 @@ from pyntegrant.map import Key, Keyset, SystemMap, build
 
 
 class System(object):
+    """A system of components, initialized from a config."""
+
     def __init__(self, built_config: SystemMap, original_config: SystemMap):
         self.__dict__.update(**built_config)
         self._original_config = original_config
@@ -21,6 +23,13 @@ class System(object):
         ref_selector: Callable[[Any], bool] = default_ref_selector,
         transform: Callable[[Any], bool] = default_ref_transform,
     ):
+        """Creates a system given a config and an initializer.
+
+        This is the entry point to creating a system from a configuration.
+        The config must be in Python dict format (in other words, using `PRef`
+        references, not text-based "#p/ref ..." references); you can replace
+        "#p/ref ..." references with `PRef` references with `replace_refs`
+        """
         original_config = replace_refs(config)
         keys = config.keys() if keys is None else keys
         built_config = build(original_config, keys, initializer.initialize)

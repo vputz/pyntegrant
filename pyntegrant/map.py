@@ -19,6 +19,8 @@ Key = str
 
 @dataclass(eq=True, frozen=True)
 class PRef:
+    """A marker class, used in dict-based config values to refer to a key."""
+
     key: str
 
 

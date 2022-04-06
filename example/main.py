@@ -13,28 +13,28 @@ def initializer() -> Initializer:
     result = Initializer()
 
     @result.register("input")
-    def _(classname, input):
+    def _(classname, input):  # type: ignore
         if classname == "StringInput":
             return StringInput(input=input)
         else:
             assert False
 
     @result.register("output")
-    def _(classname):
+    def _(classname):  # type: ignore
         if classname == "TextOutput":
             return TextOutput()
         else:
             assert False
 
     @result.register("processor")
-    def _(classname):
+    def _(classname):  # type: ignore
         if classname == "CounterProcessor":
             return CounterProcessor()
         else:
             assert False
 
     @result.register("analyzer")
-    def _(input, output, processor):
+    def _(input, output, processor):  # type: ignore
         return TextAnalyzer(input, processor, output)
 
     return result

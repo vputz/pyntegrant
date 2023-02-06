@@ -3,9 +3,15 @@ import pprint
 import networkx as nx
 import pytest
 
-from pyntegrant.map import (PRef, SystemMap, build, dependency_graph,
-                            find_keys, transitive_dependencies,
-                            transitive_dependencies_set)
+from pyntegrant.map import (
+    PRef,
+    SystemMap,
+    build,
+    dependency_graph,
+    find_keys,
+    transitive_dependencies,
+    transitive_dependencies_set,
+)
 
 
 def test_dependency_graph():
@@ -32,6 +38,7 @@ def g2() -> nx.DiGraph:
     "g, node, expected",
     [
         (g1(), "d", frozenset(("a", "b", "c"))),
+        (g1(), "e", frozenset()),
         (g2(), 7, frozenset((2, 4, 6, 1, 5, 3))),
         (g2(), 3, frozenset((2, 1))),
         (g2(), 4, frozenset((1, 2, 5))),

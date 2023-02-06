@@ -99,6 +99,15 @@ def test_build(config, expected):
     assert system.result == expected
 
 
+def test_extra_argument():
+    config = quad_config.copy()
+    config["extra"] = 42
+    i = initializer()
+    # this will fail with 'extra' in there... unless we don't ask for
+    # it and only ask for the dependencies that are used.
+    system = build(config, {"result"}, i.initialize)
+
+
 @pytest.mark.parametrize(
     "config, expected",
     # (b^2 - 4ac)/2a

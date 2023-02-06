@@ -77,20 +77,29 @@ def dependency_graph(config: SystemMap) -> DiGraph:
     )
 
 
-@require(lambda g, node: node in g)
+# There was a requirement that all nodes in the config be in the
+# dependency graph; that's no longer the case because it allows you to
+# have "orphan keys" so that you can have multiple options, eg
+# { "a": 3, "b": 4, "c": "#p/ref a" } and transitive_dependencies won't barf because b
+# exists but isn't in the dependency graph since nothing depends on it
+# @require(lambda g, node: node in g)
 @ensure(lambda result, g: all([n in g for n in result]))
 def transitive_dependencies(g: DiGraph, node: Any) -> frozenset[Any]:
     """The set of all things which any node in node-set depends on"""
-    return frozenset(nx.descendants(g, node))
+    return frozenset(nx.descendants(g, node)) if node in g else frozenset()
 
 
-@require(lambda g, nodes: [node in g for node in nodes])
+# see note on transitive_dependencies
+# @require(lambda g, nodes: [node in g for node in nodes])
 @ensure(lambda result, g: all([n in g for n in result]))
 def transitive_dependencies_set(g: DiGraph, nodes: Keyset) -> Keyset:
     """The set of all things which any node in nodes depends on,
     directly or transitively
     """
-    return frozenset.union(*[transitive_dependencies(g, node) for node in nodes])
+    dependent_nodes = frozenset({n for n in nodes if n in g})
+    return frozenset.union(
+        *[transitive_dependencies(g, node) for node in dependent_nodes]
+    )
 
 
 def find_keys(

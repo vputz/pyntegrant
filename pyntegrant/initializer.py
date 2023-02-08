@@ -2,6 +2,8 @@
 """
 from typing import Callable, Mapping
 
+from icontract import require
+
 
 class Initializer(object):
     """The Initializer class represents a single-dispatch function where
@@ -12,6 +14,21 @@ class Initializer(object):
 
     def __init__(self):
         self.handlers = {}
+        self.default_handler = None
+
+    def register_default(self):
+        """Registers a default handler.  Fails if attempted twice.
+        The default handler must take a single argument (rather
+        than other handlers which can take multiple keyword arguments
+        and be initialized that way via a dict)
+        """
+
+        def register_function(f):
+            assert self.default_handler is None
+            self.default_handler = f
+            return f
+
+        return register_function
 
     def register(self, key: str):
         """Decorator to register handlers for the initializer.
@@ -35,7 +52,12 @@ class Initializer(object):
         dicts.  If the value is a single non-mapping value, it is passed
         to the handler as a single argument.
         """
-        if isinstance(value, Mapping):
-            return self.handlers[key](**value)
+        if key in self.handlers:
+            if isinstance(value, Mapping):
+                return self.handlers[key](**value)
+            else:
+                return self.handlers[key](value)
+        elif self.default_handler is not None:
+            return self.default_handler(value)
         else:
-            return self.handlers[key](value)
+            raise ValueError(f"No handler found for key {key}")

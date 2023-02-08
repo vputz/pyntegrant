@@ -89,13 +89,13 @@ def initializer() -> Initializer:
         )
     ],
 )
-def test_build(config, expected):
+def test_build(config, expected, keys=None):
     i = initializer()
-    system = build(config, config.keys(), i.initialize)
+    system = build(config, config.keys() if keys is None else keys, i.initialize)
     print(system)
     assert system["result"] == expected
 
-    system = System.from_config(config, i)
+    system = System.from_config(config, i, keys)
     assert system.result == expected
 
 
@@ -144,3 +144,25 @@ def test_load_json(config, expected):
 @pytest.mark.parametrize("config, expected", [(quad_config_toml, 4)])
 def test_load_toml(config, expected):
     test_build(from_tomls(config), expected)
+
+
+def initializer_with_default():
+
+    result = Initializer()
+
+    @result.register_default()
+    def _(value):
+        return value
+
+    @result.register("result")
+    def _(s):
+        return s.upper()
+
+    return result
+
+
+def test_initializer_with_default():
+    config = replace_refs(dict(foo="foo", bar="bar", result="#p/ref foo"))
+    i = initializer_with_default()
+    system = build(config, {"result"}, i.initialize)
+    assert system["result"] == "FOO"
